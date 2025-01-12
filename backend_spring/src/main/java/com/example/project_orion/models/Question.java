@@ -25,12 +25,10 @@ hashCode() method on entities like collections (HashSet, List, etc.) within the 
 causing infinite recursion.
 
 Overriding of the hasCode function
-
     @Override
     public int hashCode(){
         return Objects.hash(questionId);
     }
-
 * */
 
 @Entity

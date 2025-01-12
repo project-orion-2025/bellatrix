@@ -1,7 +1,5 @@
 package com.example.project_orion.models;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

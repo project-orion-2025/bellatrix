@@ -11,19 +11,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class AnswerController {
 
     @Autowired
     private AnswerService answerService;
 
-    @GetMapping("/public/answer/{questionId}")
+    @GetMapping("/answer/{questionId}")
     public ResponseEntity<AnswerResponse> getAnswerId(@PathVariable Long questionId){
         AnswerResponse answerResponse =  answerService.getAnswer(questionId);
         return new ResponseEntity<>(answerResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/admin/validate/answer")
+    @PostMapping("/validate/answer")
     public ResponseEntity<ValidationResponse> validateAnswer(@Valid @RequestBody Submission submission){
         ValidationResponse validationResponse = answerService.validateAnswer(submission);
         return new ResponseEntity<>(validationResponse, HttpStatus.OK);

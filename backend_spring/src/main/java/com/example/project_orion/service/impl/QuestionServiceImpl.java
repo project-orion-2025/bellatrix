@@ -40,7 +40,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private ModelMapper modelMapper;
 
-    private final List<Question> questionList = new ArrayList<>();
+//    private final List<Question> questionList = new ArrayList<>();
 
     @Override
     public QuestionResponse getAllQuestions(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -191,7 +191,11 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-
+        /*
+            TODO: inactive questions are getting selected
+             if admin -> then active and inactive
+             if public -> then active only
+        */
         if(filter.isEmpty()){
             return getAllQuestions(pageNumber, pageSize, sortBy, sortOrder);
         }
