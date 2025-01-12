@@ -1,4 +1,4 @@
-package com.example.project_orion.security.dtos;
+package com.example.project_orion.security.payloads.dtos;
 
 import com.example.project_orion.security.models.Role;
 import lombok.AllArgsConstructor;

@@ -1,13 +1,18 @@
 package com.example.project_orion.security;
 
+import com.example.project_orion.security.jwt.AuthEntryPointJwt;
+import com.example.project_orion.security.jwt.AuthTokenFilter;
 import com.example.project_orion.security.models.AppRole;
 import com.example.project_orion.security.models.Role;
 import com.example.project_orion.security.models.User;
 import com.example.project_orion.security.repository.RoleRepository;
 import com.example.project_orion.security.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +21,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.time.LocalDate;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -29,6 +35,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
         jsr250Enabled = true // Roles Allowed
 )
 public class SecurityConfig {
+
+    // 1
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
+
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
@@ -37,11 +53,19 @@ public class SecurityConfig {
                                 .requestMatchers("/api/author/**").hasRole("AUTHOR")
                                 .requestMatchers("/api/user/**").hasAnyRole("USER", "AUTHOR")
                                 .requestMatchers("/api/public/**").permitAll()
+                                .requestMatchers("/api/auth/public/**").permitAll()
                                 .anyRequest()
                                 .authenticated());
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(withDefaults());
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
