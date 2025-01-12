@@ -1,4 +1,4 @@
-package com.example.project_orion.payload;
+package com.example.project_orion.payload.responses;
 
 import lombok.*;
 

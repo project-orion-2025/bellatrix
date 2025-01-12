@@ -1,4 +1,4 @@
-package com.example.project_orion.payload;
+package com.example.project_orion.payload.dtos;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 

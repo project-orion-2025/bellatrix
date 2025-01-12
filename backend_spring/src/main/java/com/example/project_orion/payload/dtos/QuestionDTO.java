@@ -1,4 +1,4 @@
-package com.example.project_orion.payload;
+package com.example.project_orion.payload.dtos;
 
 import com.example.project_orion.enums.Difficulty;
 import com.example.project_orion.enums.Status;

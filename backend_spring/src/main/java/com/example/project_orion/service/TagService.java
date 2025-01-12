@@ -3,7 +3,7 @@ package com.example.project_orion.service;
 import java.util.List;
 
 import com.example.project_orion.models.Tag;
-import com.example.project_orion.payload.TagDTO;
+import com.example.project_orion.payload.dtos.TagDTO;
 
 import jakarta.validation.Valid;
 

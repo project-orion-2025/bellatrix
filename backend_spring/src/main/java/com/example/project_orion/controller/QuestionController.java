@@ -2,8 +2,8 @@ package com.example.project_orion.controller;
 
 import com.example.project_orion.config.AppConstants;
 import com.example.project_orion.payload.Filter;
-import com.example.project_orion.payload.QuestionDTO;
-import com.example.project_orion.payload.QuestionResponse;
+import com.example.project_orion.payload.dtos.QuestionDTO;
+import com.example.project_orion.payload.responses.QuestionResponse;
 import com.example.project_orion.service.QuestionService;
 import com.example.project_orion.service.validation.CreateQuestion;
 import com.example.project_orion.service.validation.UpdateQuestion;

@@ -1,6 +1,7 @@
-package com.example.project_orion.payload;
+package com.example.project_orion.payload.responses;
 
 
+import com.example.project_orion.payload.dtos.QuestionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.example.project_orion.controller;
 
 import com.example.project_orion.models.Tag;
-import com.example.project_orion.payload.TagDTO;
+import com.example.project_orion.payload.dtos.TagDTO;
 import com.example.project_orion.service.TagService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

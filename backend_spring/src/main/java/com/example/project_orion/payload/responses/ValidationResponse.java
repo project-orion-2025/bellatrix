@@ -1,4 +1,4 @@
-package com.example.project_orion.payload;
+package com.example.project_orion.payload.responses;
 
 import com.example.project_orion.enums.SubmissionStatus;
 import lombok.*;

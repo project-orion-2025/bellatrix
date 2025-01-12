@@ -1,4 +1,4 @@
-package com.example.project_orion.service;
+package com.example.project_orion.service.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.example.project_orion.service.QuestionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,13 +23,13 @@ import com.example.project_orion.models.Option;
 import com.example.project_orion.models.Question;
 import com.example.project_orion.models.Tag;
 import com.example.project_orion.payload.Filter;
-import com.example.project_orion.payload.QuestionDTO;
-import com.example.project_orion.payload.QuestionResponse;
+import com.example.project_orion.payload.dtos.QuestionDTO;
+import com.example.project_orion.payload.responses.QuestionResponse;
 import com.example.project_orion.repository.QuestionRepository;
 import com.example.project_orion.repository.TagRepository;
 
 @Service
-public class QuestionServiceImpl implements QuestionService{
+public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
     private QuestionRepository questionRepository;

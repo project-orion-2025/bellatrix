@@ -1,18 +1,19 @@
-package com.example.project_orion.service;
+package com.example.project_orion.service.impl;
 import com.example.project_orion.enums.SubmissionStatus;
 import com.example.project_orion.exceptions.APIException;
 import com.example.project_orion.models.Question;
 import com.example.project_orion.models.Submission;
-import com.example.project_orion.payload.AnswerResponse;
-import com.example.project_orion.payload.ValidationResponse;
+import com.example.project_orion.payload.responses.AnswerResponse;
+import com.example.project_orion.payload.responses.ValidationResponse;
 import com.example.project_orion.repository.QuestionRepository;
+import com.example.project_orion.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 @Service
-public class AnswerServiceImpl implements AnswerService{
+public class AnswerServiceImpl implements AnswerService {
 
     @Autowired
     private QuestionRepository questionRepository;

@@ -1,6 +1,6 @@
 package com.example.project_orion.exceptions;
 
-import com.example.project_orion.payload.APIResponse;
+import com.example.project_orion.payload.responses.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

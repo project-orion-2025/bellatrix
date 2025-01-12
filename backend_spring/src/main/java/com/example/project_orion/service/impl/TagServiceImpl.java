@@ -1,12 +1,13 @@
-package com.example.project_orion.service;
+package com.example.project_orion.service.impl;
 
 import com.example.project_orion.exceptions.APIException;
 import com.example.project_orion.exceptions.ResourceNotFoundException;
 import com.example.project_orion.models.Question;
 import com.example.project_orion.models.Tag;
-import com.example.project_orion.payload.TagDTO;
+import com.example.project_orion.payload.dtos.TagDTO;
 import com.example.project_orion.repository.QuestionRepository;
 import com.example.project_orion.repository.TagRepository;
+import com.example.project_orion.service.TagService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
