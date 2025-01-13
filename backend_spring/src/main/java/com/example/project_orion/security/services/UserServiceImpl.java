@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
 
         String token =  UUID.randomUUID().toString();
 
-        Instant expiryDate = Instant.now().plus(24, ChronoUnit.HOURS);
+        Instant expiryDate = Instant.now().plus(10, ChronoUnit.MINUTES);
 
         PasswordResetToken resetToken = new PasswordResetToken(token, expiryDate, user);
 
@@ -208,7 +208,7 @@ public class UserServiceImpl implements UserService {
 
         EmailOTP savedEmailOTP = emailOTPRepository.findByEmail(email).orElse(null);
 
-        Instant expiryDate = Instant.now().plus(24, ChronoUnit.HOURS);
+        Instant expiryDate = Instant.now().plus(10, ChronoUnit.MINUTES);
 
         Integer otp = (int)(Math.random() * 900000) + 100000;
 
