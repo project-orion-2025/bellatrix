@@ -66,7 +66,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionDTO createQuestion(QuestionDTO questionDTO) {
+    public QuestionDTO createQuestion(String authorName, QuestionDTO questionDTO) {
 
         Question questionFromDB = questionRepository.findByTitle(questionDTO.getTitle());
 
@@ -77,7 +77,7 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = Question.builder()
                 .title(questionDTO.getTitle())
                 .description(questionDTO.getDescription())
-                .author(questionDTO.getAuthor())
+                .author(authorName)
                 .status(questionDTO.getStatus())
                 .subject(questionDTO.getSubject())
                 .difficulty(questionDTO.getDifficulty())
@@ -136,9 +136,12 @@ public class QuestionServiceImpl implements QuestionService {
         if (questionDTO.getDescription() != null) {
             questionFromDB.setDescription(questionDTO.getDescription());
         }
-        if (questionDTO.getAuthor() != null) {
-            questionFromDB.setAuthor(questionDTO.getAuthor());
-        }
+        /*
+            don't update the author, it will be fixed once it is set
+            if (questionDTO.getAuthor() != null) {
+                questionFromDB.setAuthor(questionDTO.getAuthor());
+            }
+        */
         if (questionDTO.getSubject() != null) {
             questionFromDB.setSubject(questionDTO.getSubject());
         }
@@ -151,7 +154,7 @@ public class QuestionServiceImpl implements QuestionService {
             for(int idx = 0; idx < newOptionList.size(); idx++){
                 originalOptionList.get(idx).setText(newOptionList.get(idx).getText());
             }
-          // questionFromDB.setOptions(originalOptionList);
+          // questionFromDB.setOptions(originalOptionList); redundant update
         }
         if (questionDTO.getTagList() != null) {
             Set<Tag> tags = new HashSet<>();

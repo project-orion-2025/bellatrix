@@ -6,10 +6,12 @@ import com.example.project_orion.models.Submission;
 import com.example.project_orion.payload.responses.AnswerResponse;
 import com.example.project_orion.payload.responses.ValidationResponse;
 import com.example.project_orion.repository.QuestionRepository;
+import com.example.project_orion.repository.SubmissionRepository;
 import com.example.project_orion.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -17,6 +19,9 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
 
     @Override
     public AnswerResponse getAnswer(Long questionId) {
@@ -32,20 +37,32 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public ValidationResponse validateAnswer(Submission submission) {
+    public ValidationResponse validateAnswer(String username, Long questionId, Long submittedOptionId) {
 
-        Long questionId = submission.getQuestionId();
-        Long submittedOptionId = submission.getOptionId();
         Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new APIException("Question with id " + questionId + " not found!"));
-
+                .orElseThrow(() -> {
+                    return new APIException("Question with id %d not found!".formatted(questionId));
+                });
         Long correctOptionId = question.getAnswer() != null ? question.getAnswer().getCorrectOptionId() : null;
+        SubmissionStatus status;
         if(correctOptionId == null){
-            return new ValidationResponse(SubmissionStatus.ANSWER_DOES_NOT_EXIST);
+            status = SubmissionStatus.ANSWER_DOES_NOT_EXIST;
         } else if (Objects.equals(correctOptionId, submittedOptionId)) {
-            return new ValidationResponse(SubmissionStatus.CORRECT);
+            status = SubmissionStatus.CORRECT;
         }else{
-            return new ValidationResponse(SubmissionStatus.INCORRECT);
+            status = SubmissionStatus.INCORRECT;
         }
+
+        Submission submission = Submission.builder()
+                .questionId(questionId)
+                .optionId(submittedOptionId)
+                .username(username)
+                .submissionStatus(status)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        submissionRepository.save(submission);
+
+        return new ValidationResponse(status);
     }
 }

@@ -59,7 +59,7 @@ public class SecurityConfig {
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         http.csrf(AbstractHttpConfigurer::disable);
-        http.httpBasic(withDefaults());
+//        http.httpBasic(withDefaults());
         return http.build();
     }
 

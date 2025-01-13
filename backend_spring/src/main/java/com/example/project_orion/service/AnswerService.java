@@ -7,6 +7,8 @@ import com.example.project_orion.payload.responses.ValidationResponse;
 public interface AnswerService {
     AnswerResponse getAnswer(Long questionId);
 
-    ValidationResponse validateAnswer(Submission submission);
+//    ValidationResponse validateAnswer(Submission submission);
+
+    ValidationResponse validateAnswer(String username, Long questionId, Long optionId);
 }
 

@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 public interface QuestionService {
     QuestionResponse getAllQuestions(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-    QuestionDTO createQuestion(@Valid QuestionDTO questionDTO);
+    QuestionDTO createQuestion(String username, @Valid QuestionDTO questionDTO);
 
     QuestionDTO getQuestionById(Long questionId);
 

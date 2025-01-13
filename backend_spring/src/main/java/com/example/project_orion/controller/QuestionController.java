@@ -10,6 +10,8 @@ import com.example.project_orion.service.validation.UpdateQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.groups.Default;
@@ -36,8 +38,11 @@ public class QuestionController {
     }
 
     @PostMapping("/author/questions")
-    public ResponseEntity<QuestionDTO> createQuestion(@Validated({CreateQuestion.class, Default.class}) @RequestBody QuestionDTO questionDTO){
-        QuestionDTO savedQuestionDTO = questionService.createQuestion(questionDTO);
+    public ResponseEntity<QuestionDTO> createQuestion(
+            @Validated({CreateQuestion.class, Default.class})
+            @RequestBody QuestionDTO questionDTO,
+            @AuthenticationPrincipal UserDetails userDetails){
+        QuestionDTO savedQuestionDTO = questionService.createQuestion(userDetails.getUsername(), questionDTO);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.CREATED);
     }
 
