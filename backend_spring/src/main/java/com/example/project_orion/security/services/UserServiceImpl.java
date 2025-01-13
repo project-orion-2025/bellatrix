@@ -1,5 +1,7 @@
 package com.example.project_orion.security.services;
 
+import com.example.project_orion.models.Person;
+import com.example.project_orion.repository.PersonRepository;
 import com.example.project_orion.security.models.*;
 import com.example.project_orion.security.payloads.dtos.UserDTO;
 import com.example.project_orion.security.payloads.requests.SignupRequest;
@@ -12,14 +14,14 @@ import com.example.project_orion.security.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -44,6 +46,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    PersonRepository personRepository;
 
     @Override
     public void updateUserRole(Long userId, String roleName) {
@@ -175,7 +180,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
         resetToken.setUsed(true);
-        passwordResetTokenRepository.save(resetToken);
+        passwordResetTokenRepository.delete(resetToken);
     }
 
     @Override
@@ -223,5 +228,75 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok().body(new MessageResponse("OTP sent successfully"));
     }
 
+    @Override
+    public HashMap<String, Boolean> checkUsernameAndEmailUsed(
+            String username, String email) {
+        Boolean isUserEmailExist = userRepository.existsByEmail(email);
+        Boolean isUsernameExist = userRepository.existsByUserName(username);
+
+        HashMap<String, Boolean> response = new HashMap<>();
+        response.put("username", isUsernameExist);
+        response.put("email", isUserEmailExist);
+        return  response;
+    }
+
+    @Override
+    public MessageResponse registerUser(SignupRequest signUpRequest){
+        if (userRepository.existsByUserName(signUpRequest.getUsername())) {
+            return new MessageResponse("Error: Username is already taken!");
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new MessageResponse("Error: Email is already in use!");
+        }
+
+        /*TODO: if user inputs random 6 digit otp, then the api is giving 401, it should give invalid otp*/
+        if(!validateOTP(signUpRequest)){
+            return new MessageResponse("Error: Invalid OTP!");
+        }
+
+        // Create new user's account
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                passwordEncoder .encode(signUpRequest.getPassword()));
+        Set<String> strRoles = signUpRequest.getRole();
+
+        // TODO: clean up this, make simple if-else
+        Role role;
+        if (strRoles == null || strRoles.isEmpty()) {
+            role = roleRepository.findByRoleName(AppRole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        }else {
+            String roleStr = strRoles.iterator().next();
+            if (roleStr.equalsIgnoreCase("admin")) {
+                role = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            }else if (roleStr.equalsIgnoreCase("author")) {
+                role = roleRepository.findByRoleName(AppRole.ROLE_AUTHOR)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            }else if(roleStr.equalsIgnoreCase("user")){
+                role = roleRepository.findByRoleName(AppRole.ROLE_USER)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            }
+            else {
+                return new MessageResponse("Error: Role is not found. Valid roles = user, author, admin");
+            }
+            user.setAccountNonLocked(true);
+            user.setAccountNonExpired(true);
+            user.setCredentialsNonExpired(true);
+            user.setEnabled(true);
+            user.setCredentialsExpiryDate(LocalDate.now().plusYears(1));
+            user.setAccountExpiryDate(LocalDate.now().plusYears(1));
+            user.setTwoFactorEnabled(false);
+            user.setSignUpMethod("email");
+        }
+        user.setRole(role);
+        userRepository.save(user);
+        Person person = Person.builder()
+                .username(user.getUserName())
+                .build();
+        personRepository.save(person);
+        return new MessageResponse("User registered successfully!");
+    }
 
 }

@@ -12,12 +12,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 @Table(name = "persons")
 public class Person{
-
     @Id
-    private String userId;
-
     private String username;
 
     private String collegeName;

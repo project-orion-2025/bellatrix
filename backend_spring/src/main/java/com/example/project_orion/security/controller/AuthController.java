@@ -90,55 +90,14 @@ public class AuthController {
 
     @PostMapping("/public/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUserName(signUpRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-        }
-
-        /*TODO: if user inputs random 6 digit otp, then the api is giving 401, it should give invalid otp*/
-        if(!userService.validateOTP(signUpRequest)){
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid OTP!"));
-        }
-
-        // Create new user's account
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(),
-                passwordEncoder .encode(signUpRequest.getPassword()));
-        Set<String> strRoles = signUpRequest.getRole();
-        Role role;
-        if (strRoles == null || strRoles.isEmpty()) {
-            role = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        } else {
-            String roleStr = strRoles.iterator().next();
-            if (roleStr.equalsIgnoreCase("admin")) {
-                role = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            } else if (roleStr.equalsIgnoreCase("author")) {
-                role = roleRepository.findByRoleName(AppRole.ROLE_AUTHOR)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            } else if(roleStr.equalsIgnoreCase("user")){
-                role = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            }
-            else {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: Role is not found. Valid roles = user, author, admin"));
-            }
-            user.setAccountNonLocked(true);
-            user.setAccountNonExpired(true);
-            user.setCredentialsNonExpired(true);
-            user.setEnabled(true);
-            user.setCredentialsExpiryDate(LocalDate.now().plusYears(1));
-            user.setAccountExpiryDate(LocalDate.now().plusYears(1));
-            user.setTwoFactorEnabled(false);
-            user.setSignUpMethod("email");
-        }
-        user.setRole(role);
-        userRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+       try{
+           MessageResponse messageResponse = userService.registerUser(signUpRequest);
+           return ResponseEntity.status(HttpStatus.OK)
+                   .body(messageResponse);
+       }catch (Exception e){
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                   .body(e.getMessage());
+       }
     }
 
     @GetMapping("/user")
@@ -184,9 +143,13 @@ public class AuthController {
     }
 
     @PostMapping("/public/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String token,
-                                           @RequestParam String newPassword) {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> requestData) {
         try{
+            String token = requestData.get("token");
+            String newPassword = requestData.get("newPassword");
+            if (token == null || newPassword == null) {
+                throw new IllegalArgumentException("Token and newPassword are required");
+            }
             userService.resetPassword(token, newPassword);
             return ResponseEntity.ok(new MessageResponse("Password reset successful"));
         }catch (RuntimeException e){
@@ -197,6 +160,14 @@ public class AuthController {
     @PostMapping("/public/signup-otp")
     public ResponseEntity<?> sendSignUpOTP(@RequestParam String email){
         return userService.sendSignUpOTP(email);
+    }
+
+    @GetMapping("/public/validate-username-email")
+    public ResponseEntity<?> checkUsernameAndEmailUsed(
+            @RequestParam String username,
+            @RequestParam String email){
+        HashMap<String, Boolean> response = userService.checkUsernameAndEmailUsed(username, email);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
