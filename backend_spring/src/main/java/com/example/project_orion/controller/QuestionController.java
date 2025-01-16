@@ -32,9 +32,7 @@ public class QuestionController {
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_QUESTIONS_BY, required = false) String sortBy,
             @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
     ) {
-        if (pageNumber < 0 || pageSize <= 0) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+       
 
         QuestionResponse questionResponse = questionService.getAllQuestions(pageNumber, pageSize, sortBy, sortOrder);
         return new ResponseEntity<>(questionResponse, HttpStatus.OK);
