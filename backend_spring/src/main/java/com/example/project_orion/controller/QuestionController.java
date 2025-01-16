@@ -1,21 +1,29 @@
 package com.example.project_orion.controller;
 
 import com.example.project_orion.config.AppConstants;
+import com.example.project_orion.payload.Filter;
 import com.example.project_orion.payload.QuestionDTO;
 import com.example.project_orion.payload.QuestionResponse;
 import com.example.project_orion.service.QuestionService;
-import jakarta.validation.Valid;
+import com.example.project_orion.service.validation.CreateQuestion;
+import com.example.project_orion.service.validation.UpdateQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.groups.Default;
+
 
 @RestController
 @RequestMapping("/api")
 public class QuestionController {
 
-    @Autowired
-    private QuestionService questionService;
+    private final QuestionService questionService;
+
+    public QuestionController(QuestionService questionService) {
+        this.questionService = questionService;
+    }
 
     @GetMapping("/public/questions")
     public ResponseEntity<QuestionResponse> getAllQuestions(
@@ -23,13 +31,17 @@ public class QuestionController {
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_QUESTIONS_BY, required = false) String sortBy,
             @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
-    ){
+    ) {
+        if (pageNumber < 0 || pageSize <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         QuestionResponse questionResponse = questionService.getAllQuestions(pageNumber, pageSize, sortBy, sortOrder);
         return new ResponseEntity<>(questionResponse, HttpStatus.OK);
     }
 
     @PostMapping("/admin/questions")
-    public ResponseEntity<QuestionDTO> createQuestion(@Valid @RequestBody QuestionDTO questionDTO){
+    public ResponseEntity<QuestionDTO> createQuestion(@Validated({CreateQuestion.class, Default.class}) @RequestBody QuestionDTO questionDTO){
         QuestionDTO savedQuestionDTO = questionService.createQuestion(questionDTO);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.CREATED);
     }
@@ -41,7 +53,7 @@ public class QuestionController {
     }
 
     @PutMapping("/admin/question/{questionId}")
-    public ResponseEntity<QuestionDTO> updateCategory(@RequestBody QuestionDTO questionDTO, @PathVariable Long questionId){
+    public ResponseEntity<QuestionDTO> updateCategory(@Validated({UpdateQuestion.class, Default.class}) @RequestBody QuestionDTO questionDTO, @PathVariable Long questionId){
         QuestionDTO savedQuestionDTO = questionService.updateQuestion(questionId, questionDTO);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.OK);
     }
@@ -52,4 +64,15 @@ public class QuestionController {
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.OK);
     }
 
+    @PostMapping("/public/question/search")
+    public ResponseEntity<QuestionResponse> searchQuestionsByTitle(
+            @RequestBody Filter filter,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_QUESTIONS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
+            ) {
+        QuestionResponse questions = questionService.fetchAllQuestions(filter, pageNumber, pageSize, sortBy, sortOrder);
+        return new ResponseEntity<>(questions, HttpStatus.OK);
+    }
 }
