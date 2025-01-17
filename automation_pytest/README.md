@@ -1,1 +1,0 @@
-This folder contains all the automation code written in pytest
