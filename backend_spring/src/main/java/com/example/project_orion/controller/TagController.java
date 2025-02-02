@@ -24,19 +24,19 @@ public class TagController {
         return new ResponseEntity<>(tagList, HttpStatus.OK);
     }
 
-    @PostMapping("/admin/tags")
+    @PostMapping("/author/tags")
     public ResponseEntity<Tag> createTag(@RequestParam String tagName){
         Tag savedTag = tagService.createTag(tagName);
         return new ResponseEntity<>(savedTag, HttpStatus.OK);
     }
 
-    @PutMapping("/admin/tags")
+    @PutMapping("/author/tags")
     public ResponseEntity<TagDTO> updateTag(@Valid @RequestBody TagDTO tagDTO){
         TagDTO savedTagDTO = tagService.updateTag(tagDTO);
         return new ResponseEntity<>(savedTagDTO, HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/tags/{tagId}")
+    @DeleteMapping("/author/tags/{tagId}")
     public ResponseEntity<TagDTO> deleteTag(@PathVariable Long tagId){
         TagDTO deletedTagDTO = tagService.deleteTag(tagId);
         return new ResponseEntity<>(deletedTagDTO, HttpStatus.OK);

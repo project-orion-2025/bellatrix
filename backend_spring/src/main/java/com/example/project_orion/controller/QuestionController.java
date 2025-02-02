@@ -33,7 +33,7 @@ public class QuestionController {
         return new ResponseEntity<>(questionResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/admin/questions")
+    @PostMapping("/author/questions")
     public ResponseEntity<QuestionDTO> createQuestion(@Validated({CreateQuestion.class, Default.class}) @RequestBody QuestionDTO questionDTO){
         QuestionDTO savedQuestionDTO = questionService.createQuestion(questionDTO);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.CREATED);
@@ -45,13 +45,13 @@ public class QuestionController {
         return new ResponseEntity<>(questionDTO, HttpStatus.OK);
     }
 
-    @PutMapping("/admin/question/{questionId}")
+    @PutMapping("/author/question/{questionId}")
     public ResponseEntity<QuestionDTO> updateCategory(@Validated({UpdateQuestion.class, Default.class}) @RequestBody QuestionDTO questionDTO, @PathVariable Long questionId){
         QuestionDTO savedQuestionDTO = questionService.updateQuestion(questionId, questionDTO);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/question/{questionId}")
+    @DeleteMapping("/author/question/{questionId}")
     public ResponseEntity<QuestionDTO> deleteCategory(@PathVariable Long questionId){
         QuestionDTO savedQuestionDTO = questionService.deleteQuestion(questionId);
         return new ResponseEntity<>(savedQuestionDTO, HttpStatus.OK);
