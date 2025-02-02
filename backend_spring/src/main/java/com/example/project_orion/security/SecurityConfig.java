@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/author/**").hasRole("AUTHOR")
                                 .requestMatchers("/api/user/**").hasAnyRole("USER", "AUTHOR")
+                                .requestMatchers("/actuator/prometheus/**").permitAll() //TODO: make only admin have this privilege
                                 .requestMatchers("/api/public/**").permitAll()
                                 .requestMatchers("/api/auth/public/**").permitAll()
                                 .anyRequest()
