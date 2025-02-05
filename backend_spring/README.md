@@ -180,7 +180,7 @@ If not, a 404 error with a message is returned.
 
 ## 3. Create Question API
 
-`POST /api/admin/questions`
+`POST /api/author/questions`
 
 ### Description
 
@@ -438,7 +438,7 @@ This API is used to update the details of a specific question in the system. It 
 
 ### Endpoint
 
-`PUT /api/admin/question/{questionId}`
+`PUT /api/author/question/{questionId}`
 
 This endpoint allows updating a specific question based on the provided `questionId`.
 
@@ -553,7 +553,7 @@ The tags linked to the question will remain in the tagsDB and will not be delete
 
 ### Endpoint
 
-`DELETE /api/admin/question/{questionId}`
+`DELETE /api/author/question/{questionId}`
 
 ### Request Parameters
 
