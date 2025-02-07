@@ -1,0 +1,931 @@
+openapi: 3.0.1
+info:
+  title: Project Orion APIs
+  description: API documentation for dev-security branch
+  version: 1.2.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/author/tags:
+    put:
+      tags:
+      - tag-controller
+      operationId: updateTag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagDTO"
+    post:
+      tags:
+      - tag-controller
+      operationId: createTag
+      parameters:
+      - name: tagName
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Tag"
+  /api/author/question/{questionId}:
+    put:
+      tags:
+      - question-controller
+      operationId: updateCategory
+      parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionDTO"
+    delete:
+      tags:
+      - question-controller
+      operationId: deleteCategory
+      parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionDTO"
+  /api/admin/update-role:
+    put:
+      tags:
+      - admin-controller
+      operationId: updateUserRole
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: roleName
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/admin/update-password:
+    put:
+      tags:
+      - admin-controller
+      operationId: updatePassword
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: password
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/admin/update-lock-status:
+    put:
+      tags:
+      - admin-controller
+      operationId: updateAccountLockStatus
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: lock
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/admin/update-expiry-status:
+    put:
+      tags:
+      - admin-controller
+      operationId: updateAccountExpiryStatus
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: expire
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/admin/update-enabled-status:
+    put:
+      tags:
+      - admin-controller
+      operationId: updateAccountEnabledStatus
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: enabled
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/admin/update-credentials-expiry-status:
+    put:
+      tags:
+      - admin-controller
+      operationId: updateCredentialsExpiryStatus
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: expire
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/user/submit-answer:
+    post:
+      tags:
+      - answer-controller
+      operationId: validateAnswer
+      parameters:
+      - name: questionId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: optionId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ValidationResponse"
+  /api/public/question/search:
+    post:
+      tags:
+      - question-controller
+      operationId: searchQuestionsByTitle
+      parameters:
+      - name: pageNumber
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: sortBy
+        in: query
+        required: false
+        schema:
+          type: string
+          default: questionId
+      - name: sortOrder
+        in: query
+        required: false
+        schema:
+          type: string
+          default: asc
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filter"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionResponse"
+  /api/author/questions:
+    post:
+      tags:
+      - question-controller
+      operationId: createQuestion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionDTO"
+  /api/auth/public/signup:
+    post:
+      tags:
+      - auth-controller
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/auth/public/signup-otp:
+    post:
+      tags:
+      - auth-controller
+      operationId: sendSignUpOTP
+      parameters:
+      - name: email
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/auth/public/signin:
+    post:
+      tags:
+      - auth-controller
+      operationId: authenticateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/auth/public/reset-password:
+    post:
+      tags:
+      - auth-controller
+      operationId: resetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/auth/public/forgot-password:
+    post:
+      tags:
+      - auth-controller
+      operationId: forgotPassword
+      parameters:
+      - name: email
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/user/get-user-progress:
+    get:
+      tags:
+      - answer-controller
+      operationId: getUserProgress
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserProgress"
+  /api/user/answer/{questionId}:
+    get:
+      tags:
+      - answer-controller
+      operationId: getAnswerId
+      parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AnswerResponse"
+  /api/public/tags:
+    get:
+      tags:
+      - tag-controller
+      operationId: getAllTags
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+  /api/public/questions:
+    get:
+      tags:
+      - question-controller
+      operationId: getAllQuestions
+      parameters:
+      - name: pageNumber
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: sortBy
+        in: query
+        required: false
+        schema:
+          type: string
+          default: questionId
+      - name: sortOrder
+        in: query
+        required: false
+        schema:
+          type: string
+          default: asc
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionResponse"
+  /api/public/question/{questionId}:
+    get:
+      tags:
+      - question-controller
+      operationId: getQuestionById
+      parameters:
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/QuestionDTO"
+  /api/auth/username:
+    get:
+      tags:
+      - auth-controller
+      operationId: currentUserName
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/auth/user:
+    get:
+      tags:
+      - auth-controller
+      operationId: getUserDetails
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/auth/public/validate-username-email:
+    get:
+      tags:
+      - auth-controller
+      operationId: checkUsernameAndEmailUsed
+      parameters:
+      - name: username
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: email
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+  /api/admin/user/{id}:
+    get:
+      tags:
+      - admin-controller
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+  /api/admin/roles:
+    get:
+      tags:
+      - admin-controller
+      operationId: getAllRoles
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+  /api/admin/getusers:
+    get:
+      tags:
+      - admin-controller
+      operationId: getAllUsers
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /api/author/tags/{tagId}:
+    delete:
+      tags:
+      - tag-controller
+      operationId: deleteTag
+      parameters:
+      - name: tagId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TagDTO"
+components:
+  schemas:
+    TagDTO:
+      required:
+      - tagId
+      - text
+      type: object
+      properties:
+        tagId:
+          type: integer
+          format: int64
+        text:
+          type: string
+    Option:
+      type: object
+      properties:
+        optionId:
+          type: integer
+          format: int64
+        text:
+          type: string
+    QuestionDTO:
+      required:
+      - correctOptionId
+      - description
+      - difficulty
+      - options
+      - status
+      - subject
+      - tagList
+      - title
+      type: object
+      properties:
+        questionId:
+          type: integer
+          format: int64
+        title:
+          maxLength: 50
+          minLength: 3
+          type: string
+        description:
+          maxLength: 1000
+          minLength: 6
+          type: string
+        author:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+        subject:
+          type: string
+          enum:
+          - PHYSICS
+          - MATHEMATICS
+          - CHEMISTRY
+          - BIOLOGY
+          - OTHERS
+        difficulty:
+          type: string
+          enum:
+          - EASY
+          - MEDIUM
+          - HARD
+        options:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            $ref: "#/components/schemas/Option"
+        tagList:
+          maxItems: 2147483647
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        correctOptionId:
+          maximum: 4
+          minimum: 1
+          type: integer
+          format: int32
+    Tag:
+      type: object
+      properties:
+        tagId:
+          type: integer
+          format: int64
+        text:
+          type: string
+    ValidationResponse:
+      type: object
+      properties:
+        submissionStatus:
+          type: string
+          enum:
+          - CORRECT
+          - INCORRECT
+          - ANSWER_DOES_NOT_EXIST
+    Filter:
+      type: object
+      properties:
+        subject:
+          type: string
+          enum:
+          - PHYSICS
+          - MATHEMATICS
+          - CHEMISTRY
+          - BIOLOGY
+          - OTHERS
+        difficulty:
+          type: string
+          enum:
+          - EASY
+          - MEDIUM
+          - HARD
+        title:
+          type: string
+        tagList:
+          type: array
+          items:
+            type: integer
+            format: int64
+        empty:
+          type: boolean
+    QuestionResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionDTO"
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        lastPage:
+          type: boolean
+    SignupRequest:
+      required:
+      - email
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          maxLength: 20
+          minLength: 3
+          type: string
+        email:
+          maxLength: 50
+          minLength: 0
+          type: string
+        otp:
+          maximum: 999999
+          minimum: 100000
+          type: integer
+          format: int32
+        role:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        password:
+          maxLength: 40
+          minLength: 6
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserProgress:
+      type: object
+      properties:
+        easy:
+          type: integer
+          format: int64
+        medium:
+          type: integer
+          format: int64
+        hard:
+          type: integer
+          format: int64
+    AnswerResponse:
+      type: object
+      properties:
+        questionId:
+          type: integer
+          format: int64
+        correctOptionId:
+          type: integer
+          format: int64
+    Role:
+      type: object
+      properties:
+        roleId:
+          type: integer
+          format: int32
+        roleName:
+          type: string
+          enum:
+          - ROLE_USER
+          - ROLE_AUTHOR
+          - ROLE_ADMIN
+        users:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    User:
+      required:
+      - email
+      - userName
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        userName:
+          maxLength: 20
+          minLength: 0
+          type: string
+        email:
+          maxLength: 50
+          minLength: 0
+          type: string
+        accountNonLocked:
+          type: boolean
+        accountNonExpired:
+          type: boolean
+        credentialsNonExpired:
+          type: boolean
+        enabled:
+          type: boolean
+        credentialsExpiryDate:
+          type: string
+          format: date
+        accountExpiryDate:
+          type: string
+          format: date
+        twoFactorSecret:
+          type: string
+        signUpMethod:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        twoFactorEnabled:
+          type: boolean
+    UserDTO:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        userName:
+          type: string
+        email:
+          type: string
+        accountNonLocked:
+          type: boolean
+        accountNonExpired:
+          type: boolean
+        credentialsNonExpired:
+          type: boolean
+        enabled:
+          type: boolean
+        credentialsExpiryDate:
+          type: string
+          format: date
+        accountExpiryDate:
+          type: string
+          format: date
+        twoFactorSecret:
+          type: string
+        signUpMethod:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        twoFactorEnabled:
+          type: boolean
