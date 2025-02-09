@@ -28,12 +28,10 @@ public class QuestionController {
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_QUESTIONS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
-    ){
-        /*
-        TODO: API crashing if the pagination details were wrong
-        */
-        QuestionResponse questionResponse = questionService.getAllQuestions(pageNumber, pageSize, sortBy, sortOrder);
+            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder,
+            @RequestParam(name = "userType", defaultValue = "public", required = false) String userType
+    ) {
+        QuestionResponse questionResponse = questionService.fetchAllQuestions(new Filter(), pageNumber, pageSize, sortBy, sortOrder, userType);
         return new ResponseEntity<>(questionResponse, HttpStatus.OK);
     }
 
@@ -70,9 +68,12 @@ public class QuestionController {
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_QUESTIONS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder
-            ) {
-        QuestionResponse questions = questionService.fetchAllQuestions(filter, pageNumber, pageSize, sortBy, sortOrder);
+            @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR, required = false) String sortOrder,
+            @RequestParam(name = "userType", required = true) String userType
+    ) {
+        QuestionResponse questions = questionService.fetchAllQuestions(filter, pageNumber, pageSize, sortBy, sortOrder, userType);
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 }
+
+

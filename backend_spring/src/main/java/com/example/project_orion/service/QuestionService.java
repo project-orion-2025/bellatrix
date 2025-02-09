@@ -16,6 +16,5 @@ public interface QuestionService {
 
     QuestionDTO deleteQuestion(@Valid Long questionId);
 
-    QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
-
+    QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String userType);
 }

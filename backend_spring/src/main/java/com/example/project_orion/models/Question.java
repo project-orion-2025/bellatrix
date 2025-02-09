@@ -3,33 +3,18 @@ package com.example.project_orion.models;
 import com.example.project_orion.enums.Difficulty;
 import com.example.project_orion.enums.Status;
 import com.example.project_orion.enums.Subject;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.project_orion.service.QuestionIdGeneratorService;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.Set;
-
-/*
-// @Data
-WARNING :: don't use @Data , use @Getter & @Setter
-IF YOU WANT TO USE THE @Data then Override the @hashCode function,
-inorder to avoid the stackoverflow in case of many-to-many relationships
-
-The error happens because the hash code calculation recursively calls the
-hashCode() method on entities like collections (HashSet, List, etc.) within the entity itself,
-causing infinite recursion.
-
-Overriding of the hasCode function
-    @Override
-    public int hashCode(){
-        return Objects.hash(questionId);
-    }
-* */
 
 @Entity
 @Getter
@@ -38,10 +23,10 @@ Overriding of the hasCode function
 @AllArgsConstructor
 @Builder
 @Table(name = "questions")
+@Configurable
 public class Question {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long questionId;
 
     @NotBlank
@@ -84,4 +69,15 @@ public class Question {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tagList;
+
+    @Transient
+    @Autowired
+    private QuestionIdGeneratorService questionIdGeneratorService;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.questionId == null) {
+            this.questionId = questionIdGeneratorService.generateNextId();
+        }
+    }
 }
