@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.example.project_orion.enums.Status;
+import com.example.project_orion.service.QuestionIdGeneratorService;
 import com.example.project_orion.service.QuestionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import com.example.project_orion.models.Answer;
 import com.example.project_orion.models.Option;
 import com.example.project_orion.models.Question;
 import com.example.project_orion.models.Tag;
+import com.example.project_orion.enums.Status;
 import com.example.project_orion.payload.Filter;
 import com.example.project_orion.payload.dtos.QuestionDTO;
 import com.example.project_orion.payload.responses.QuestionResponse;
@@ -41,6 +42,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private QuestionIdGeneratorService questionIdGeneratorService;
 
     @Override
     public QuestionResponse getAllQuestions(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -65,16 +69,6 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionDTO deleteQuestion(Long questionId) {
-        Question questionFromDB = questionRepository.findById(questionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Question", "questionId", questionId));
-
-        questionRepository.delete(questionFromDB);
-
-        return modelMapper.map(questionFromDB, QuestionDTO.class);
-    }
-
-    @Override
     public QuestionDTO createQuestion(String authorName, QuestionDTO questionDTO) {
         Question questionFromDB = questionRepository.findByTitle(questionDTO.getTitle());
 
@@ -82,7 +76,10 @@ public class QuestionServiceImpl implements QuestionService {
             throw new APIException("Question with title " + questionDTO.getTitle() + " already exists!!!");
         }
 
+        Long generatedId = questionIdGeneratorService.generateNextId();
+
         Question question = Question.builder()
+                .questionId(generatedId)
                 .title(questionDTO.getTitle())
                 .description(questionDTO.getDescription())
                 .author(authorName)
@@ -180,6 +177,16 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    public QuestionDTO deleteQuestion(Long questionId) {
+        Question questionFromDB = questionRepository.findById(questionId)
+                .orElseThrow(() -> new APIException("Question with id " + questionId + " not found!"));
+
+        QuestionDTO questionDTO = modelMapper.map(questionFromDB, QuestionDTO.class);
+        questionRepository.delete(questionFromDB);
+        return questionDTO;
+    }
+
+    @Override
     public QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String userType) {
         String status = "public".equalsIgnoreCase(userType) ? Status.ACTIVE.name() : null;
 
@@ -240,9 +247,10 @@ public class QuestionServiceImpl implements QuestionService {
             case "difficulty" -> sortOrder.equalsIgnoreCase("asc") ?
                     Comparator.comparing(Question::getDifficulty) :
                     Comparator.comparing(Question::getDifficulty).reversed();
-            case "questionId" -> sortOrder.equalsIgnoreCase("asc") ?
-                    Comparator.comparingLong(Question::getQuestionId) :
-                    Comparator.comparingLong(Question::getQuestionId).reversed();
+            case "questionId" ->
+                    sortOrder.equalsIgnoreCase("asc") ?
+                            Comparator.comparingLong(Question::getQuestionId) :
+                            Comparator.comparingLong(Question::getQuestionId).reversed();
             default -> null;
         };
     }

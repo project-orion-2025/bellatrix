@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Table(name = "questions")
+@Configurable
 public class Question {
 
     @Id
@@ -68,14 +70,14 @@ public class Question {
     )
     private Set<Tag> tagList;
 
+    @Transient
+    @Autowired
+    private QuestionIdGeneratorService questionIdGeneratorService;
+
     @PrePersist
     public void prePersist() {
         if (this.questionId == null) {
             this.questionId = questionIdGeneratorService.generateNextId();
         }
     }
-
-    @Transient
-    @Autowired
-    private QuestionIdGeneratorService questionIdGeneratorService;
 }
