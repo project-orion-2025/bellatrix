@@ -6,7 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.example.project_orion.enums.Status;
 import com.example.project_orion.service.QuestionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +42,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private ModelMapper modelMapper;
 
-//    private final List<Question> questionList = new ArrayList<>();
-
     @Override
     public QuestionResponse getAllQuestions(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -66,11 +65,20 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionDTO createQuestion(String authorName, QuestionDTO questionDTO) {
+    public QuestionDTO deleteQuestion(Long questionId) {
+        Question questionFromDB = questionRepository.findById(questionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Question", "questionId", questionId));
 
+        questionRepository.delete(questionFromDB);
+
+        return modelMapper.map(questionFromDB, QuestionDTO.class);
+    }
+
+    @Override
+    public QuestionDTO createQuestion(String authorName, QuestionDTO questionDTO) {
         Question questionFromDB = questionRepository.findByTitle(questionDTO.getTitle());
 
-        if(questionFromDB != null){
+        if (questionFromDB != null) {
             throw new APIException("Question with title " + questionDTO.getTitle() + " already exists!!!");
         }
 
@@ -95,7 +103,6 @@ public class QuestionServiceImpl implements QuestionService {
             Set<Tag> tags = new HashSet<>();
             for (Tag tag : question.getTagList()) {
                 Tag existingTag = tagRepository.findByText(tag.getText());
-                // Save new tag if it doesn't exist
                 tags.add(Objects.requireNonNullElseGet(existingTag, () -> tagRepository.save(tag)));
             }
             question.setTagList(tags);
@@ -106,7 +113,6 @@ public class QuestionServiceImpl implements QuestionService {
         List<Option> options = savedQuestion.getOptions();
         Long correctOptionId = options.get(questionDTO.getCorrectOptionId() - 1).getOptionId();
 
-        // Create an Answer and set the correct option
         Answer answer = new Answer();
         answer.setCorrectOptionId(correctOptionId);
         savedQuestion.setAnswer(answer);
@@ -125,23 +131,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public QuestionDTO updateQuestion(Long questionId, QuestionDTO questionDTO) {
-
         Question questionFromDB = questionRepository.findById(questionId)
                 .orElseThrow(() -> new APIException("Question with id " + questionId + " not found!"));
 
-        // Only update fields that are provided in the DTO
         if (questionDTO.getTitle() != null) {
             questionFromDB.setTitle(questionDTO.getTitle());
         }
         if (questionDTO.getDescription() != null) {
             questionFromDB.setDescription(questionDTO.getDescription());
         }
-        /*
-            don't update the author, it will be fixed once it is set
-            if (questionDTO.getAuthor() != null) {
-                questionFromDB.setAuthor(questionDTO.getAuthor());
-            }
-        */
         if (questionDTO.getSubject() != null) {
             questionFromDB.setSubject(questionDTO.getSubject());
         }
@@ -151,10 +149,9 @@ public class QuestionServiceImpl implements QuestionService {
         if (questionDTO.getOptions() != null) {
             List<Option> newOptionList = questionDTO.getOptions();
             List<Option> originalOptionList = questionFromDB.getOptions();
-            for(int idx = 0; idx < newOptionList.size(); idx++){
+            for (int idx = 0; idx < newOptionList.size(); idx++) {
                 originalOptionList.get(idx).setText(newOptionList.get(idx).getText());
             }
-          // questionFromDB.setOptions(originalOptionList); redundant update
         }
         if (questionDTO.getTagList() != null) {
             Set<Tag> tags = new HashSet<>();
@@ -164,7 +161,7 @@ public class QuestionServiceImpl implements QuestionService {
             }
             questionFromDB.setTagList(tags);
         }
-        if(questionDTO.getStatus() != null){
+        if (questionDTO.getStatus() != null) {
             questionFromDB.setStatus(questionDTO.getStatus());
         }
         Question updatedQuestion = questionRepository.save(questionFromDB);
@@ -183,40 +180,28 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionDTO deleteQuestion(Long questionId) {
-        Question questionFromDB = questionRepository.findById(questionId)
-                .orElseThrow(() -> new APIException("Question with id " + questionId + " not found!"));
-
-        QuestionDTO questionDTO = modelMapper.map(questionFromDB, QuestionDTO.class);
-        questionRepository.delete(questionFromDB);
-        return questionDTO;
-    }
-
-    @Override
-    public QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        /*
-            TODO: inactive questions are getting selected
-             if admin -> then active and inactive
-             if public -> then active only
-        */
-        if(filter.isEmpty()){
-            return getAllQuestions(pageNumber, pageSize, sortBy, sortOrder);
-        }
-
-        String subjectValue = (filter.getSubject() != null) ? filter.getSubject().toString() : null;
-        String difficultyValue = (filter.getDifficulty() != null) ? filter.getDifficulty().toString() : null;
-        Integer tagCount = (filter.getTagList() != null) ? filter.getTagList().size() : null;
+    public QuestionResponse fetchAllQuestions(Filter filter, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String userType) {
+        String status = "public".equalsIgnoreCase(userType) ? Status.ACTIVE.name() : null;
 
         List<Question> questionList;
-        if(filter.getTagList() == null){
-            questionList = questionRepository.findQuestions(filter.getTitle(), subjectValue, difficultyValue);
-        }else{
-            questionList = questionRepository.findQuestionsWithTags(filter.getTitle(),
-                    subjectValue,
-                    difficultyValue,
-                    filter.getTagList(),
-                    tagCount
-            );
+        if (filter.isEmpty()) {
+            questionList = questionRepository.findQuestions("", null, null, status);
+        } else {
+            String subjectValue = (filter.getSubject() != null) ? filter.getSubject().toString() : null;
+            String difficultyValue = (filter.getDifficulty() != null) ? filter.getDifficulty().toString() : null;
+            Integer tagCount = (filter.getTagList() != null) ? filter.getTagList().size() : null;
+
+            if (filter.getTagList() == null) {
+                questionList = questionRepository.findQuestions(filter.getTitle(), subjectValue, difficultyValue, status);
+            } else {
+                questionList = questionRepository.findQuestionsWithTags(filter.getTitle(),
+                        subjectValue,
+                        difficultyValue,
+                        filter.getTagList(),
+                        tagCount,
+                        status
+                );
+            }
         }
 
         Comparator<Question> comparator = getComparator(sortBy, sortOrder);
@@ -228,12 +213,12 @@ public class QuestionServiceImpl implements QuestionService {
         int startIndex = pageNumber * pageSize;
         int endIndex = Math.min(startIndex + pageSize, totalQuestions);
         List<Question> paginatedQuestions = new ArrayList<>();
-        if(startIndex < endIndex){
+        if (startIndex < endIndex) {
             paginatedQuestions = questionList.subList(startIndex, endIndex);
         }
         List<QuestionDTO> questionDTOS = paginatedQuestions.stream()
                 .map(question -> modelMapper.map(question, QuestionDTO.class))
-                .toList();
+                .collect(Collectors.toList());
         QuestionResponse questionResponse = new QuestionResponse();
         questionResponse.setContent(questionDTOS);
         questionResponse.setPageNumber(pageNumber);
@@ -242,7 +227,6 @@ public class QuestionServiceImpl implements QuestionService {
         questionResponse.setTotalPages((int) Math.ceil((double) totalQuestions / pageSize));
         questionResponse.setLastPage(endIndex == totalQuestions);
         return questionResponse;
-
     }
 
     private Comparator<Question> getComparator(String sortBy, String sortOrder) {
@@ -256,32 +240,10 @@ public class QuestionServiceImpl implements QuestionService {
             case "difficulty" -> sortOrder.equalsIgnoreCase("asc") ?
                     Comparator.comparing(Question::getDifficulty) :
                     Comparator.comparing(Question::getDifficulty).reversed();
-            case "questionId" ->
-                    sortOrder.equalsIgnoreCase("asc") ?
-                            Comparator.comparingLong(Question::getQuestionId) :
-                            Comparator.comparingLong(Question::getQuestionId).reversed();
+            case "questionId" -> sortOrder.equalsIgnoreCase("asc") ?
+                    Comparator.comparingLong(Question::getQuestionId) :
+                    Comparator.comparingLong(Question::getQuestionId).reversed();
             default -> null;
         };
     }
-
 }
-
-
-/*   
-Note on Bidirectional Relationships in JPA:
-In a bidirectional relationship, Spring JPA does not automatically
-update the association on both sides. For example, when persisting
-a Question with its Options, the "question" field in the Option entity
-must be explicitly set. This ensures that the foreign key (QUESTION_ID)
-in the options table is populated.
-
-Reason: JPA does not infer the relationship on the inverse (child) side
-unless explicitly mapped in the code. Without setting the relationship
-on both sides, the child entity (Option) won't know about the parent
-entity (Question), resulting in a null foreign key.
-
-Example fix:
-Before saving the Question, ensure each Option has its "question" field set:
-*/
-
-
